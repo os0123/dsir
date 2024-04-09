@@ -1,0 +1,405 @@
+Write a python program to plot word 
+cloud for a Wikipedia page of any topic
+
+from wordcloud import WordCloud, STOPWORDS 
+import matplotlib.pyplot as plt 
+import wikipedia as wp 
+
+result = wp.page('Computer Science') 
+final_result = result.content 
+print(final_result) 
+
+def plot_wordcloud(wc): 
+    plt.axis("off") 
+    plt.figure(figsize=(10,10)) 
+    plt.imshow(wc) 
+    plt.show() 
+
+wc=WordCloud(width=500, height=500, background_color="blue", random_state=10,stopwords=STOPWORDS).generate(final_result) 
+wc.to_file("cs.png") 
+plot_wordcloud(wc)
+
+Write a python program to perform 
+Web Scrapping
+1.HTML scrapping- use Beautiful Soup
+2.JSON scrapping
+
+#html scrapping#
+
+
+# In[3]:
+
+
+import pandas as pd 
+from bs4 import BeautifulSoup 
+from urllib.request import urlopen 
+url = "https://en.wikipedia.org/wiki/List_of_Asian_countries_by_area" 
+page = urlopen(url) 
+html_page = page.read().decode("utf-8") 
+soup=BeautifulSoup(html_page,"html.parser") 
+table=soup.find("table") 
+print(table)
+
+SrNo=[] 
+Country=[] 
+Area=[] 
+rows=table.find("tbody").find_all("tr") 
+for row in rows: 
+    cells = row.find_all("td") 
+    if(cells): 
+        SrNo.append(cells[0].get_text().strip("\n")) 
+        Country.append(cells[1].get_text().strip("\xa0").strip("\n").strip("\[2]*")) 
+        Area.append(cells[3].get_text().strip("\n").replace(",","")) 
+countries_df=pd.DataFrame() 
+countries_df["ID"]=SrNo 
+countries_df["Country Name"]=Country 
+countries_df["Area"] = Area 
+print(countries_df.head(10))
+
+#json scraping#
+
+
+# In[4]:
+
+
+import pandas as pd 
+import urllib.request
+import json 
+
+url = "https://jsonplaceholder.typicode.com/users" 
+response = urllib.request.urlopen(url) 
+data = json.loads(response.read()) 
+
+id=[] 
+username=[] 
+email=[] 
+
+for item in data: 
+    if "id" in item.keys(): 
+        id.append(item["id"]) 
+    else: 
+        id.append("NA") 
+    if "username" in item.keys(): 
+        username.append(item["username"]) 
+    else: 
+        username.append("NA") 
+    if "email" in item.keys(): 
+        email.append(item["email"]) 
+    else: 
+        email.append("NA") 
+
+user_df = pd.DataFrame() 
+user_df["User ID"]=id 
+user_df["User Name"]=username 
+user_df["Email Address"] = email 
+print(user_df.head(10))
+
+
+# In[ ]:
+
+5 1)Write a python program to build a 
+regression model that could predict the 
+salary of an employee from the given 
+experience and visualize univariate 
+linear regression on it.
+2) Write a python program to simulate 
+linear model Y=10+7*x+e for random 
+100 samples and visualize univariate 
+linear regression on it.
+
+import numpy as np
+from sklearn import datasets
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+# Generate synthetic dataset
+x, y, coef = datasets.make_regression(n_samples=100, n_features=1, n_informative=1, noise=10, coef=True, random_state=0)
+
+# Normalize the features and target
+x = np.interp(x, (x.min(), x.max()), (0, 20))
+y = np.interp(y, (y.min(), y.max()), (20000, 150000))
+
+# Plot the training data
+plt.plot(x, y, '.', label="training data")
+plt.xlabel("Years of Experience")
+plt.ylabel("Salary")
+plt.title("Experience vs Salary")
+
+# Fit linear regression model
+reg_model = LinearRegression()
+reg_model.fit(x.reshape(-1, 1), y)
+
+# Predict the target values
+y_pred = reg_model.predict(x.reshape(-1, 1))
+
+# Plot the regression line
+plt.plot(x, y_pred, color="black", label="Regression line")
+
+plt.legend()
+plt.show()
+
+import pandas as pd
+
+# Create DataFrame from the data
+data = {'Experience': np.round(x.flatten()), 'Salary': np.round(y)}
+df = pd.DataFrame(data)
+
+print(df.head(10))
+
+
+2) Write a python program to simulate 
+linear model Y=10+7*x+e for random 
+100 samples and visualize univariate 
+linear regression on it.
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+# Generate random data
+np.random.seed(0)
+x = np.random.rand(100, 1)  # Generate 100 random samples
+y_intercept = 10
+slope = 7
+error = np.random.randn(100, 1)  # Generate normally distributed noise
+y = y_intercept + slope * x + error
+
+# Fit linear regression model
+reg_model = LinearRegression()
+reg_model.fit(x, y)
+
+# Predict the target values
+y_pred = reg_model.predict(x)
+
+# Plot the data and regression line
+plt.scatter(x, y, s=10)
+plt.plot(x, y_pred, color="black")
+plt.xlabel("X")
+plt.ylabel("Y")
+plt.title("Univariate Linear Regression")
+plt.show()
+
+
+Write a python program to implement 
+multiple linear regression on the 
+Dataset Boston.csv
+
+import pandas as pd 
+import matplotlib.pyplot as plt 
+import sklearn 
+boston = pd.read_csv("Boston.csv") 
+boston.head() 
+boston.info() 
+boston = boston.drop(columns="Unnamed: 0") 
+boston.info() 
+boston_x = pd.DataFrame(boston.iloc[:,:13]) 
+boston_y = pd.DataFrame(boston.iloc[:,-1]) 
+boston_x.head() 
+boston_y.head() 
+from sklearn.model_selection import train_test_split 
+X_train, X_test, Y_train, Y_test = train_test_split(boston_x, boston_y, test_size=0.3) 
+print("xtrain shape", X_train.shape) 
+print("ytrain shape", Y_train.shape) 
+print("xtest shape", X_test.shape) 
+print("ytest shape", Y_test.shape) 
+from sklearn.linear_model import LinearRegression 
+regression=LinearRegression() 
+regression.fit(X_train,Y_train) 
+Y_pred_linear = regression.predict(X_test) 
+Y_pred_df = pd.DataFrame(Y_pred_linear,columns=["Predicted"]) 
+Y_pred_df.head() 
+plt.scatter(Y_test, Y_pred_linear, c="green") 
+plt.xlabel("Actual Price(medv)") 
+plt.ylabel("Predicted Pric(medv)") 
+plt.title("Actual vs Prediction") 
+plt.show() 
+
+
+Write a python program to implement 
+KNN algorithm to predict breast cancer 
+using breast cancer wisconsin dataset .
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import confusion_matrix, f1_score, roc_auc_score
+
+bc = load_breast_cancer()
+df = pd.DataFrame(bc.data, columns = bc.feature_names)
+df.head()
+x = df[['mean area', 'mean compactness']]
+print(x)
+
+y = pd.Categorical.from_codes(bc.target, bc.target_names)
+y = pd.get_dummies(y, drop_first=True)
+print(y)
+x_train, x_test, y_train, y_test = train_test_split(x,y,random_state = 1)
+
+knn = KNeighborsClassifier(n_neighbors=5, metric='euclidean')
+knn.fit(x_train,y_train)
+y_pred = knn.predict(x_test)
+print(y_pred)
+plt.scatter(x_test['mean area'], x_test['mean compactness'], c= y_pred, cmap='coolwarm')
+plt.show()
+sns.scatterplot(x='mean area',y='mean compactness', hue = 'benign', data=x_test.join(y_test, how = 'outer'))
+cf = confusion_matrix(y_test,y_pred)
+ax = plt.subplot()
+
+sns.heatmap(cf, ax=ax, annot = True)
+ax.set_title('Confusion Matrix')
+ax.set_xlabel('Predicted')
+ax.set_ylabel('Actual')
+ax.xaxis.set_ticklabels(['MAlignant','Benign'])
+ax.yaxis.set_ticklabels(['MAlignant','Benign'])
+tp,fn,fp,tn = confusion_matrix(y_test, y_pred,labels=[1,0]).reshape(-1)
+
+print(tp,fn,fp,tn)
+a = (tp+fp)/(tp+fn+fp+tn)
+p = tp/(tp+fp)
+r = tp/(tp+fn)
+print(a)
+print(p)
+print(r)
+print(f1_score(y_pred,y_test))
+print(roc_auc_score(y_pred,y_test))
+
+
+
+
+
+3 Exploratory Data Analysis of mtcars.csv 
+Dataset in R ( Use functions of dplyr like 
+select, filter, mutate , rename, arrange,
+group by, summarize and data 
+visualizations
+
+
+# Read data
+cars_df <- read.csv("mtcars.csv")
+
+# View data
+head(cars_df)
+str(cars_df)
+dim(cars_df)
+names(cars_df)
+row.names(cars_df) <- cars_df$model
+cars_df <- cars_df[, -1]
+head(cars_df)
+
+# Load dplyr package
+library(dplyr)
+
+# Select columns
+df1 <- select(cars_df, mpg:hp)
+# Or using pipe operator
+df1 <- cars_df %>% select(mpg:hp)
+head(df1)
+
+# Filter rows
+df1 <- cars_df %>% filter(gear == 4) %>% select(c(mpg, disp, wt, gear))
+head(df1)
+
+# Arrange function
+df1 <- cars_df %>% arrange(cyl, desc(mpg))
+head(df1)
+
+# Rename columns
+df1 <- cars_df %>% rename(MilesPerGallon = mpg, Cylinders = cyl, Displacement = disp)
+head(df1)
+
+# Mutate function
+df1 <- cars_df %>% mutate(Power = hp * wt)
+head(df1)
+
+# Group_by and summarise
+df1$gear <- as.factor(df1$gear)
+summary_df <- df1 %>% group_by(gear) %>% summarise(no = n(), mean_mpg = mean(mpg), mean_wt = mean(wt))
+summary_df
+
+# Data Visualization
+# Histogram
+hist(df1$mpg, main = "Histogram of Miles Per Gallon (mtcars)", col = "lightgreen", xlab = "Miles Per Gallon")
+
+# Box plot
+boxplot(df1$mpg)
+
+# Bar plot
+barplot(table(df1$gear))
+
+# Scatter plot
+plot(df1$mpg ~ df1$disp)
+plot(df1$mpg ~ df1$cyl)
+plot(df1$mpg ~ df1$wt)
+
+
+4 Perform Exploratory Data analysis in 
+Python using Titanic database
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Read Titanic dataset
+titanic = pd.read_csv("train.csv")
+
+# Display basic information about the dataset
+print(titanic.head())
+print(titanic.info())
+print(titanic.describe())
+print(titanic.isnull().sum())
+
+# Drop unnecessary columns
+titanic_cleaned = titanic.drop(['PassengerId', 'Name', 'Ticket', 'Fare', 'Cabin'], axis=1)
+
+# Visualize survival by sex
+sns.catplot(x="Sex", hue="Survived", kind="count", data=titanic_cleaned)
+
+# Group by sex and survival
+group1 = titanic_cleaned.groupby(['Sex', 'Survived'])
+gender_survived = group1.size().unstack()
+
+# Visualize survival by sex using heatmap
+sns.heatmap(gender_survived, annot=True, fmt="d")
+
+# Visualize survival by sex and age using violin plot
+sns.violinplot(x="Sex", y="Age", hue="Survived", data=titanic_cleaned, split=True)
+
+# Additional information about age
+print("Oldest Person on Board:", titanic_cleaned['Age'].max())
+print("Youngest Person on Board:", titanic_cleaned['Age'].min())
+print("Average age of Person on Board:", titanic_cleaned['Age'].mean())
+
+# Impute missing age values based on Pclass
+def impute_age(cols):
+    Age = cols[0]
+    Pclass = cols[1]
+    if pd.isnull(Age):
+        if Pclass == 1:
+            return 38
+        elif Pclass == 2:
+            return 29
+        else:
+            return 24
+    else:
+        return Age
+
+titanic_cleaned['Age'] = titanic_cleaned[['Age', 'Pclass']].apply(impute_age, axis=1)
+
+# Display correlations
+print(titanic_cleaned.corr(method='pearson'))
+sns.heatmap(titanic_cleaned.corr(method="pearson"), annot=True, vmax=1)
+
+# Generate synthetic data
+from sklearn import datasets
+x, y, coef = datasets.make_regression(n_samples=100, n_features=1, n_informative=1, noise=10, coef=True, random_state=0)
+x = np.interp(x, (x.min(), x.max()), (0, 20))
+print(len(x))
+print(x)
+y = np.interp(y, (y.min(), y.max()), (20000, 150000))
+print(len(y))
+print(y)
